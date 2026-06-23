@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee List</title>
+
+<style>
+
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f7fb;
+padding:30px;
+}
+
+.container{
+background:white;
+padding:25px;
+border-radius:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+h1{
+color:#003366;
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #eee;
+text-align:left;
+}
+
+th{
+background:#003366;
+color:white;
+}
+
+.btn{
+background:#F4C542;
+border:none;
+padding:8px 15px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Employee List</h1>
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Department</th>
+<th>Position</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="employeeTable">
+<tr>
+<td colspan="5">Loading...</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://tuihpvykuqbqnfyfepql.supabase.co";
+
+const SUPABASE_KEY =
+"YOUR_ANON_KEY";
+
+const db =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+loadEmployees();
+
+async function loadEmployees(){
+
+const tbody =
+document.getElementById("employeeTable");
+
+tbody.innerHTML="";
+
+const { data: profiles, error } =
+await db
+.from("employee_profiles")
+.select("*");
+
+if(error){
+tbody.innerHTML =
+`<tr><td colspan="5">${error.message}</td></tr>`;
+return;
+}
+
+for(const profile of profiles){
+
+const { data:user } =
+await db
+.from("users")
+.select("*")
+.eq("id", profile.user_id)
+.single();
+
+tbody.innerHTML += `
+<tr>
+
+<td>${user?.full_name || ""}</td>
+
+<td>${user?.department || ""}</td>
+
+<td>${profile.position || ""}</td>
+
+<td>${profile.employment_status || ""}</td>
+
+<td>
+<button class="btn"
+onclick="viewEmployee(${profile.user_id})">
+View
+</button>
+</td>
+
+</tr>
+`;
+}
+
+}
+
+function viewEmployee(userId){
+
+window.location.href =
+"employee_profile.html?id=" + userId;
+
+}
+
+</script>
+
+</body>
+</html>
